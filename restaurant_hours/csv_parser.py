@@ -9,7 +9,7 @@ import re
 
 # Weekday names
 WEEKDAYS = [
-    'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun',
+    'Mon', 'Tues', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun',
 ]
 
 # Hours string separators
@@ -73,19 +73,38 @@ def parse_hours_block_string(hours_block_string):
     #       error handling, but we'll keep things simple for the scope of the
     #       exercise.
     days_string, hours_string = re.findall(expr, hours_block_string)[0]
+    parsed_days = parse_days_string(days_string)
     # TODO: for testing
-    return {'days': days_string, 'hours': hours_string}
-    # TODO: parse_days_string()
+    return {'days': parsed_days, 'hours': hours_string}
     # TODO: parse_hours_range_string()
     # TODO: return dict, only include keys for days in this block
 
 
 def parse_days_string(days_string):
     '''TODO: document'''
-    # TODO: split on DAY_JUMP_SEP
-    # TODO: for each day chunk, expand any ranges
-    # TODO: after expanding, return array with all days in string
-    pass
+    day_blocks = days_string.split(DAY_JUMP_SEP)
+    days_open = []
+    for day_block_string in day_blocks:
+        if DAY_RANGE_SEP in day_block_string:
+            # This is a range of days, so we want to get all days between them.
+            days_open.extend(parse_day_range_string(day_block_string))
+        else:
+            # This is a single day.
+            days_open.append(day_block_string)
+    return days_open
+
+
+def parse_day_range_string(day_range_string):
+    '''TODO: DOC'''
+    start, end = day_range_string.split(DAY_RANGE_SEP)
+    start_index = WEEKDAYS.index(start)
+    end_index = WEEKDAYS.index(end)
+    # NOTE: Since the assignment states that we can rely on the formatting of
+    #       the CSV, we're assuming the days are valid values in WEEKDAYS and
+    #       that start_index < end_index, because that's how all the date
+    #       ranges in the file are structured.
+    return WEEKDAYS[start_index:end_index + 1]
+
 
 
 def parse_hours_range_string(hours_string):
