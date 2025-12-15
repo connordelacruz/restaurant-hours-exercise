@@ -34,8 +34,6 @@ def parse_csv(filename):
             name = row[0]
             hours_string = row[1]
             restaurant_data[name] = parse_restaurant_hours_string(hours_string)
-    # TODO: DEBUG:
-    pprint(restaurant_data)
     return restaurant_data
 
 # ================================================================================
@@ -77,13 +75,11 @@ def parse_hours_block_string(hours_block_string):
     days_string, hours_string = re.findall(expr, hours_block_string)[0]
     parsed_days = parse_days_string(days_string)
     parsed_hours = parse_hours_range_string(hours_string)
-    # TODO: for testing
+    # TODO: figure out how we wanna handle midnight
     return {
         'days': parsed_days,
         'hours': parsed_hours,
     }
-# TODO: parse_hours_range_string()
-# TODO: return dict, only include keys for days in this block
 
 
 def parse_days_string(days_string):
@@ -127,24 +123,42 @@ def parse_day_range_string(day_range_string):
     return WEEKDAYS[start_index:end_index + 1]
 
 
+def parse_hours_range_string(hours_range_string):
+    '''Returns dict with sanitized open and closing hours strings.
 
-def parse_hours_range_string(hours_string):
-    '''TODO: document'''
-    opens, closes = hours_string.split(HOUR_RANGE_SEP)
-    # TODO: add minutes if not present
-    # TODO: debugging
+    :param hours_range_string: String representation of a range of hours.
+
+    :return: Dict with keys 'opens' and 'closes' containing opening and closing hours strings respectively.
+    '''
+    opens, closes = hours_range_string.split(HOUR_RANGE_SEP)
     return {
-        'opens': opens,
-        'closes': closes,
+        'opens': sanitize_hours_string(opens),
+        'closes': sanitize_hours_string(closes),
     }
 
 
+def sanitize_hours_string(hours_string):
+    '''Make sure time strings are formatted consistently.
+
+    Some hours omit the minutes if it's exactly on the hour. In those cases, add ':00' as the minutes.
+
+    :param hours_string: String representation of open/close hours. May or may not include minutes.
+
+    :return: String representation of open/close hours with minutes.
+    '''
+    expr = r'^(\d{1,2})(:\d{2})?(\s[ap]m)$'
+    # NOTE: We're assuming this expression will always match since the exercise states that the CSV data will always be well-formed.
+    hours, minutes, period = re.findall(expr, hours_string)[0]
+    # If minutes were not specified, append them for consistency.
+    if minutes == '':
+        minutes = ':00'
+    return f'{hours}{minutes}{period}'
+
 # ================================================================================
-# Main (For Testing)
+# Main
 # ================================================================================
 
-# TODO: more informative function name
-def main():
+def parse_restaurant_hours():
     '''Function to call when file is executed directly.'''
     package_root_dir = os.path.dirname(__file__)
     data_dir = os.path.join(package_root_dir, 'data')
@@ -153,4 +167,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    parse_restaurant_hours()
