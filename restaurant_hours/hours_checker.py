@@ -1,5 +1,6 @@
 from datetime import datetime
 from restaurant_hours.constants import WEEKDAYS
+from restaurant_hours.csv_parser import parse_restaurant_hours
 
 # ================================================================================
 # Constants
@@ -16,11 +17,4 @@ TIMESTAMP_FMT = '%Y-%-m-%-d-%-I:%M%p'
 # TODO: doc and implement
 def get_open_restaurants(target_timestamp):
     target_datetime = datetime.strptime(target_timestamp, TIMESTAMP_FMT)
-
-# ================================================================================
-# Timestamp Parsing
-# ================================================================================
-
-# TODO: doc and implement
-def get_day_from_timestamp(timestamp):
-    pass
+    target_weekday = WEEKDAYS[target_datetime.weekday()]

@@ -38,35 +38,34 @@ def parse_csv(filename):
 
 def parse_restaurant_hours_string(hours_string):
     '''Takes a full hours string for a restaurant that may include multiple
-    hours "blocks" and returns a dictionary mapping weekdays to a dictionary
-    with 'opens' and 'closes' hours for that day.
+    hours "blocks" and returns a list of tuples with days, opens, and closes
+    hours. See parse_hours_block_string() for more information on tuple format.
 
     :param hours_string: String representation of a restaurant's hours.
 
-    :return: Dictionary mapping weekdays to dictionaries with 'opens' and
-        'closes' hours.
+    :return: List of tuples with days, opens, and closes hours.
     '''
-    # Initialize return value, default to False (closed) for each day
-    hours_data = {day: False for day in WEEKDAYS}
+    hours_data = []
     # Parse each chunk of the restaurant hours string
     hours_blocks = hours_string.split(BLOCK_SEP)
     for hours_block_string in hours_blocks:
-        hours_block_string = hours_block_string.strip()
-        parsed = parse_hours_block_string(hours_block_string)
-        # Merge results with hours_data
-        hours_data = hours_data | parsed
+        parsed = parse_hours_block_string(hours_block_string.strip())
+        # TODO: insert() if we update parse_hours_block_string() to return a list
+        hours_data.append(parsed)
     return hours_data
 
 
 def parse_hours_block_string(hours_block_string):
     '''Takes an hours "block" string (i.e. specifies 1 or more days and a range
-    of hours) and parses it into a dictionary mapping weekdays to a dictionary
-    with 'opens' and 'closes' hours for that day.
+    of hours) and parses it into a tuple with the following data at each index:
+
+        - 0: Comma-separated weekdays
+        - 1: Time restaurant opens
+        - 2: Time restaurant closes
 
     :param hours_block_string: String representation of a hours block.
 
-    :return: Dictionary mapping weekdays to dictionaries with 'opens' and
-        'closes' hours.
+    :return: Tuple with days, opens, and closes hours.
     '''
     # Expression to split the hours block into weekdays and times.
     # Since the first part of an hours block is the days of the week, the first
@@ -83,9 +82,12 @@ def parse_hours_block_string(hours_block_string):
     days_string, hours_string = re.findall(expr, hours_block_string)[0]
     parsed_days = parse_days_string(days_string)
     parsed_hours = parse_hours_range_string(hours_string)
-    return {
-        day: parsed_hours for day in parsed_days
-    }
+    parsed_days_string = ','.join(parsed_days)
+    # TODO: have parse_hours_range_string() return tuple
+    opens = parsed_hours['opens']
+    closes = parsed_hours['closes']
+    # TODO: return as a list, include post-midnight stuff
+    return (parsed_days_string, opens, closes)
 
 
 def parse_days_string(days_string):
