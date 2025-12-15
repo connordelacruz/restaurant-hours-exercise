@@ -41,25 +41,37 @@ def parse_csv(filename):
 # ================================================================================
 
 def parse_restaurant_hours_string(hours_string):
-    '''TODO: document'''
+    '''Takes a full hours string for a restaurant that may include multiple
+    hours "blocks" and returns a dictionary mapping weekdays to a dictionary
+    with 'opens' and 'closes' hours for that day.
+
+    :param hours_string: String representation of a restaurant's hours.
+
+    :return: Dictionary mapping weekdays to dictionaries with 'opens' and
+        'closes' hours.
+    '''
     # Initialize return value, default to False (closed) for each day
     hours_data = {day: False for day in WEEKDAYS}
-    # TODO: for testing
-    debug_hours_data = []
     # Parse each chunk of the restaurant hours string
     hours_blocks = hours_string.split(BLOCK_SEP)
     for hours_block_string in hours_blocks:
         hours_block_string = hours_block_string.strip()
-        # TODO: implement for real
         parsed = parse_hours_block_string(hours_block_string)
-        debug_hours_data.append(parsed)
-
-    # TODO: for testing
-    return debug_hours_data
+        # Merge results with hours_data
+        hours_data = hours_data | parsed
+    return hours_data
 
 
 def parse_hours_block_string(hours_block_string):
-    '''TODO: document'''
+    '''Takes an hours "block" string (i.e. specifies 1 or more days and a range
+    of hours) and parses it into a dictionary mapping weekdays to a dictionary
+    with 'opens' and 'closes' hours for that day.
+
+    :param hours_block_string: String representation of a hours block.
+
+    :return: Dictionary mapping weekdays to dictionaries with 'opens' and
+        'closes' hours.
+    '''
     # Expression to split the hours block into weekdays and times.
     # Since the first part of an hours block is the days of the week, the first
     # match group simply needs to match non-numeric characters.
@@ -75,10 +87,8 @@ def parse_hours_block_string(hours_block_string):
     days_string, hours_string = re.findall(expr, hours_block_string)[0]
     parsed_days = parse_days_string(days_string)
     parsed_hours = parse_hours_range_string(hours_string)
-    # TODO: figure out how we wanna handle midnight
     return {
-        'days': parsed_days,
-        'hours': parsed_hours,
+        day: parsed_hours for day in parsed_days
     }
 
 
@@ -128,7 +138,8 @@ def parse_hours_range_string(hours_range_string):
 
     :param hours_range_string: String representation of a range of hours.
 
-    :return: Dict with keys 'opens' and 'closes' containing opening and closing hours strings respectively.
+    :return: Dict with keys 'opens' and 'closes' containing opening and closing
+        hours strings respectively.
     '''
     opens, closes = hours_range_string.split(HOUR_RANGE_SEP)
     return {
@@ -140,9 +151,11 @@ def parse_hours_range_string(hours_range_string):
 def sanitize_hours_string(hours_string):
     '''Make sure time strings are formatted consistently.
 
-    Some hours omit the minutes if it's exactly on the hour. In those cases, add ':00' as the minutes.
+    Some hours omit the minutes if it's exactly on the hour. In those cases,
+    add ':00' as the minutes.
 
-    :param hours_string: String representation of open/close hours. May or may not include minutes.
+    :param hours_string: String representation of open/close hours. May or may
+        not include minutes.
 
     :return: String representation of open/close hours with minutes.
     '''
