@@ -1,17 +1,13 @@
 #!/usr/bin/env python3
 import csv
 import os
-from pprint import pprint
 import re
+
+from restaurant_hours.constants import WEEKDAYS
 
 # ================================================================================
 # Constants
 # ================================================================================
-
-# Weekday names
-WEEKDAYS = [
-    'Mon', 'Tues', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun',
-]
 
 # Hours string separators
 BLOCK_SEP = '/'
