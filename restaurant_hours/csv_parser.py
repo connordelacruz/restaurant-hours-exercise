@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import csv
+import os
 from pprint import pprint
 import re
 
@@ -33,8 +34,9 @@ def parse_csv(filename):
             name = row[0]
             hours_string = row[1]
             restaurant_data[name] = parse_restaurant_hours_string(hours_string)
-    # TODO: return something
+    # TODO: DEBUG:
     pprint(restaurant_data)
+    return restaurant_data
 
 # ================================================================================
 # Hours String Helpers
@@ -141,9 +143,13 @@ def parse_hours_range_string(hours_string):
 # Main (For Testing)
 # ================================================================================
 
+# TODO: more informative function name
 def main():
     '''Function to call when file is executed directly.'''
-    parse_csv('restaurants.csv')
+    package_root_dir = os.path.dirname(__file__)
+    data_dir = os.path.join(package_root_dir, 'data')
+    csv_path = os.path.join(data_dir, 'restaurants.csv')
+    return parse_csv(csv_path)
 
 
 if __name__ == '__main__':
