@@ -1,0 +1,15 @@
+DROP TABLE IF EXISTS restaurant;
+DROP TABLE IF EXISTS hours;
+
+CREATE TABLE restaurant (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT UNIQUE NOT NULL
+);
+
+CREATE TABLE hours (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    restaurant_id INTEGER NOT NULL,
+    days = TEXT NOT NULL,
+    opens = INTEGER NOT NULL,
+    closes = INTEGER NOT NULL
+);

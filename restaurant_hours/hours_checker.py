@@ -19,3 +19,5 @@ def get_open_restaurants(target_timestamp):
     # TODO: error handling for mismatched format
     target_datetime = datetime.strptime(target_timestamp, TIMESTAMP_FMT)
     target_weekday = WEEKDAYS[target_datetime.weekday()]
+    # Converted target time to int representation of 24 hour time.
+    target_time_int = (target_datetime.hour * 100) + target_datetime.minute
