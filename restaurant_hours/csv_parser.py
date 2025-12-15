@@ -50,8 +50,7 @@ def parse_restaurant_hours_string(hours_string):
     hours_blocks = hours_string.split(BLOCK_SEP)
     for hours_block_string in hours_blocks:
         parsed = parse_hours_block_string(hours_block_string.strip())
-        # TODO: insert() if we update parse_hours_block_string() to return a list
-        hours_data.append(parsed)
+        hours_data.extend(parsed)
     return hours_data
 
 
@@ -63,9 +62,13 @@ def parse_hours_block_string(hours_block_string):
         - 1: Time restaurant opens
         - 2: Time restaurant closes
 
+    To handle cases where closing hours are past midnight (i.e. bleed into the
+    next day), closing times will cap at 1159, then an additional tuple entry
+    will be added for the days/times that bleed over.
+
     :param hours_block_string: String representation of a hours block.
 
-    :return: Tuple with days, opens, and closes hours.
+    :return: List of tuples with days, opens, and closes hours.
     '''
     # Expression to split the hours block into weekdays and times.
     # Since the first part of an hours block is the days of the week, the first
@@ -81,13 +84,21 @@ def parse_hours_block_string(hours_block_string):
     #       exercise.
     days_string, hours_string = re.findall(expr, hours_block_string)[0]
     parsed_days = parse_days_string(days_string)
-    parsed_hours = parse_hours_range_string(hours_string)
+    opens, closes = parse_hours_range_string(hours_string)
     parsed_days_string = ','.join(parsed_days)
-    # TODO: have parse_hours_range_string() return tuple
-    opens = parsed_hours['opens']
-    closes = parsed_hours['closes']
-    # TODO: return as a list, include post-midnight stuff
-    return (parsed_days_string, opens, closes)
+
+    to_return = []
+    # Handle case where closing hours are past midnight and bleed into the next day.
+    if closes < opens:
+        original_closes = closes
+        # Consider this block ending at 11:59pm
+        closes = 2359
+        # Generate an entry for the time that bleeds into the next day
+        to_return.append(create_after_midnight_hours_block(original_closes, parsed_days))
+    # NOTE: ordering shouldn't matter, but putting the midnight bleed block after reads a little better.
+    to_return.insert(0, (parsed_days_string, opens, closes))
+
+    return to_return
 
 
 def parse_days_string(days_string):
@@ -132,18 +143,17 @@ def parse_day_range_string(day_range_string):
 
 
 def parse_hours_range_string(hours_range_string):
-    '''Returns dict with sanitized open and closing hours strings.
+    '''Returns tuple with open and closing hours converted to ints.
 
     :param hours_range_string: String representation of a range of hours.
 
-    :return: Dict with keys 'opens' and 'closes' containing opening and closing
-        hours strings respectively.
+    :return: Tuple with open and closing hours converted to ints.
     '''
     opens, closes = hours_range_string.split(HOUR_RANGE_SEP)
-    return {
-        'opens': sanitize_hours_string(opens),
-        'closes': sanitize_hours_string(closes),
-    }
+    return (
+        sanitize_hours_string(opens),
+        sanitize_hours_string(closes),
+    )
 
 
 def sanitize_hours_string(hours_string):
@@ -185,6 +195,33 @@ def convert_time_to_int(hours, minutes, period):
         hours_int = 0
     minutes_int = int(minutes)
     return (hours_int * 100) + minutes_int
+
+
+def create_after_midnight_hours_block(original_closes, original_days):
+    '''Returns an hours block to handle when hours are past midnight and
+    technically bleed into the next day.
+
+    For each day in the listed hours, shift to the following day. Set opens
+    time to 0 and closes time to the original closing time.
+
+    :param original_closes: Original close time as an int.
+    :param original_days: List of days from original listing.
+
+    :return: Tuple with days string followed by open and close times as integers.
+    '''
+    midnight_bleed_day_indexes = []
+    # For each original day, get the next day in the week (where post-midnight hours bleed into)
+    for original_day in original_days:
+        midnight_bleed_day_index = (WEEKDAYS.index(original_day) + 1) % len(WEEKDAYS)
+        midnight_bleed_day_indexes.append(midnight_bleed_day_index)
+    # NOTE: Implementation doesn't require sorting the days, but it's nice to have consistent ordering
+    midnight_bleed_days = [
+        WEEKDAYS[i] for i in sorted(midnight_bleed_day_indexes)
+    ]
+    midnight_bleed_days_string = ','.join(midnight_bleed_days)
+    # Return a block where start time is midnight and end time is the original close time
+    return (midnight_bleed_days_string, 0, original_closes)
+
 
 # ================================================================================
 # Main
