@@ -74,14 +74,25 @@ def parse_hours_block_string(hours_block_string):
     #       exercise.
     days_string, hours_string = re.findall(expr, hours_block_string)[0]
     parsed_days = parse_days_string(days_string)
+    parsed_hours = parse_hours_range_string(hours_string)
     # TODO: for testing
-    return {'days': parsed_days, 'hours': hours_string}
-    # TODO: parse_hours_range_string()
-    # TODO: return dict, only include keys for days in this block
+    return {
+        'days': parsed_days,
+        'hours': parsed_hours,
+    }
+# TODO: parse_hours_range_string()
+# TODO: return dict, only include keys for days in this block
 
 
 def parse_days_string(days_string):
-    '''TODO: document'''
+    '''Takes a string representation of days for an hours block and returns a
+    list of each weekday this string represents.
+
+    :param days_string: String of weekdays from an hours block that can include
+        ranges of days and jumps between days.
+
+    :return: List of weekdays represented by this string.
+    '''
     day_blocks = days_string.split(DAY_JUMP_SEP)
     days_open = []
     for day_block_string in day_blocks:
@@ -95,7 +106,15 @@ def parse_days_string(days_string):
 
 
 def parse_day_range_string(day_range_string):
-    '''TODO: DOC'''
+    '''Take a string representation of a range of days (e.g. 'Mon-Fri') and
+    return a list of each weekday in that range.
+
+    Assumes the start day appears before the end day in WEEKDAYS.
+
+    :param day_range_string: String representation of a day range.
+
+    :return: List of each day within the range.
+    '''
     start, end = day_range_string.split(DAY_RANGE_SEP)
     start_index = WEEKDAYS.index(start)
     end_index = WEEKDAYS.index(end)
@@ -109,10 +128,13 @@ def parse_day_range_string(day_range_string):
 
 def parse_hours_range_string(hours_string):
     '''TODO: document'''
-    # TODO: split open/close on HOUR_RANGE_SEP
+    opens, closes = hours_string.split(HOUR_RANGE_SEP)
     # TODO: add minutes if not present
-    # TODO: return {open: open_time_string, close: close_time_string}
-    pass
+    # TODO: debugging
+    return {
+        'opens': opens,
+        'closes': closes,
+    }
 
 
 # ================================================================================
