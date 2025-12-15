@@ -10,5 +10,6 @@ setup(
     install_requires=[
         'Flask>=3.1,<3.2',
         'Flask-RESTful>=0.3,<0.4',
+        'click>=8.3,<8.4',
     ],
 )

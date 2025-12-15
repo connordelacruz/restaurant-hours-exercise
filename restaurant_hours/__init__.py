@@ -3,6 +3,7 @@ import os
 from flask import Flask
 
 from . import constants
+from . import db
 from . import csv_parser
 from . import hours_checker
 from . import api
@@ -29,7 +30,9 @@ def create_app(test_config=None):
     except OSError:
         pass
 
+    # Initialize database
+    db.init_app(app)
     # Initialize API
-    api.init(app)
+    api.init_app(app)
 
     return app

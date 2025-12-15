@@ -9,7 +9,7 @@ CREATE TABLE restaurant (
 CREATE TABLE hours (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     restaurant_id INTEGER NOT NULL,
-    days = TEXT NOT NULL,
-    opens = INTEGER NOT NULL,
-    closes = INTEGER NOT NULL
+    days TEXT NOT NULL,
+    opens INTEGER NOT NULL,
+    closes INTEGER NOT NULL
 );

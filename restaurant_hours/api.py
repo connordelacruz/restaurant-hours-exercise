@@ -9,7 +9,7 @@ class RestaurantHours(Resource):
         return parse_restaurant_hours()
 
 
-def init(app):
+def init_app(app):
     '''Initialize API.'''
     api = Api(app)
     api.add_resource(RestaurantHours, '/<string:timestamp>')
