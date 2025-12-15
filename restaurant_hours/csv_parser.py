@@ -147,7 +147,8 @@ def parse_hours_range_string(hours_range_string):
 
 
 def sanitize_hours_string(hours_string):
-    '''Make sure time strings are formatted consistently.
+    '''Make sure time strings are formatted consistently, then converts to an
+    integer representation for easier comparisons.
 
     Some hours omit the minutes if it's exactly on the hour. In those cases,
     add ':00' as the minutes.
@@ -155,15 +156,35 @@ def sanitize_hours_string(hours_string):
     :param hours_string: String representation of open/close hours. May or may
         not include minutes.
 
-    :return: String representation of open/close hours with minutes.
+    :return: Integer representation of the time.
     '''
-    expr = r'^(\d{1,2})(:\d{2})?(\s[ap]m)$'
+    expr = r'^(\d{1,2}):?(\d{2})?\s([ap]m)$'
     # NOTE: We're assuming this expression will always match since the exercise states that the CSV data will always be well-formed.
     hours, minutes, period = re.findall(expr, hours_string)[0]
     # If minutes were not specified, append them for consistency.
     if minutes == '':
-        minutes = ':00'
-    return f'{hours}{minutes}{period}'
+        minutes = '00'
+    return convert_time_to_int(hours, minutes, period)
+
+
+def convert_time_to_int(hours, minutes, period):
+    '''Convert 12-hour time string representation to an integer representation
+    of the 24 hour time.
+
+    :param hours: String representation of hours.
+    :param minutes: String representation of minutes.
+    :param period: String representation of period (am/pm).
+
+    :return: Integer representing the 24 hour time.
+    '''
+    period = period.lower()
+    hours_int = int(hours)
+    if period == 'pm' and hours_int < 12:
+        hours_int = hours_int + 12
+    elif period == 'am' and hours_int == 12:
+        hours_int = 0
+    minutes_int = int(minutes)
+    return (hours_int * 100) + minutes_int
 
 # ================================================================================
 # Main

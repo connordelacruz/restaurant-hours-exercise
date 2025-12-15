@@ -16,5 +16,6 @@ TIMESTAMP_FMT = '%Y-%-m-%-d-%-I:%M%p'
 
 # TODO: doc and implement
 def get_open_restaurants(target_timestamp):
+    # TODO: error handling for mismatched format
     target_datetime = datetime.strptime(target_timestamp, TIMESTAMP_FMT)
     target_weekday = WEEKDAYS[target_datetime.weekday()]
