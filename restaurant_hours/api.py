@@ -5,7 +5,7 @@ from restaurant_hours.csv_parser import parse_restaurant_hours
 
 class RestaurantHours(Resource):
     def get(self, timestamp):
-        # TODO: implement
+        # TODO: implement, use db
         return parse_restaurant_hours()
 
 

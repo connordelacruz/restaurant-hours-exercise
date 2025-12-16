@@ -2,7 +2,11 @@ from datetime import datetime
 import sqlite3
 import click
 from flask import current_app, g
+from restaurant_hours.csv_parser import parse_restaurant_hours
 
+# ================================================================================
+# Flask Functions
+# ================================================================================
 
 def init_app(app):
     '''Register database teardown and CLI commands.'''
@@ -33,6 +37,7 @@ def init_db():
     with current_app.open_resource('data/schema.sql') as f:
         db.executescript(f.read().decode('utf8'))
     # TODO: populate init data
+    populate_app_data(db)
 
 
 @click.command('init-db')
@@ -41,6 +46,45 @@ def init_db_command():
     init_db()
     click.echo('Initialized database.')
 
+# ================================================================================
+# Restaurant Hours Data
+# ================================================================================
+
+def populate_app_data(db):
+    '''TODO: doc'''
+    # Parse data from CSV
+    restaurant_hours_data = parse_restaurant_hours()
+    populate_restaurant_table(db, restaurant_hours_data)
+    populate_hours_table(db, restaurant_hours_data)
+
+
+def populate_restaurant_table(db, restaurant_hours_data):
+    '''Insert restaurant names into table.'''
+    # Wrap each name as a tuple to appease executemany()'s formatting requirements
+    restaurant_name_tuples = [(name,) for name in restaurant_hours_data.keys()]
+    cursor = db.cursor()
+    cursor.executemany(
+        'INSERT INTO restaurant (name) VALUES (?)',
+        restaurant_name_tuples
+    )
+    db.commit()
+
+
+def populate_hours_table(db, restaurant_hours_data):
+    '''Insert restaurant hours into table.'''
+    cursor = db.cursor()
+    # Get restaurant names and their IDs for mapping
+    cursor.execute('SELECT name,id FROM restaurant')
+    rows = cursor.fetchall()
+    # Iterate through restaurants
+    for row in rows:
+        # TODO: for testing. Finish
+        print(f'{row['id']}: {row['name']}')
+
+
+# ================================================================================
+# sqlite3 Misc
+# ================================================================================
 
 # Have python interpret db timestamp values as datetime objects.
 sqlite3.register_converter(
