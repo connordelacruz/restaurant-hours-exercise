@@ -5,7 +5,6 @@ from flask import Flask
 from . import constants
 from . import db
 from . import csv_parser
-from . import hours_checker
 from . import api
 
 
