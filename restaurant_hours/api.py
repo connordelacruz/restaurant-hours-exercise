@@ -19,9 +19,21 @@ class RestaurantHours(Resource):
     def get(self, timestamp):
         '''Parses a timestamp in the format specified by TIMESTAMP_FMT and
         returns a list of restaurant names that are open at that day/time.
+
+        :param timestamp: GET parameter for the target day/time in the format
+            specified by TIMESTAMP_FMT.
+
+        :return: List of restaurant names that are open at the specified
+            day/time. If timestamp could not be parsed, will return an error
+            message instead.
         '''
-        # TODO: error handling for mismatched format
-        target_datetime = datetime.strptime(timestamp, TIMESTAMP_FMT)
+        try:
+            target_datetime = datetime.strptime(timestamp, TIMESTAMP_FMT)
+        except ValueError as e:
+            msg = {
+                'error': 'Timestamp must be in format YYYY-M-D-h:mmp (e.g. "2025-5-19-2:30pm")'
+            }
+            return msg, 400
         target_weekday = WEEKDAYS[target_datetime.weekday()]
         # Converted target time to int representation of 24 hour time.
         target_time_int = (target_datetime.hour * 100) + target_datetime.minute
