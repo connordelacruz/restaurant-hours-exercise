@@ -1,2 +1,4 @@
 # Flask intance
 instance/
+# Virtual env
+venv/
