@@ -36,13 +36,15 @@ def init_db():
     db = get_db()
     with current_app.open_resource('data/schema.sql') as f:
         db.executescript(f.read().decode('utf8'))
-    populate_app_data(db)
 
 
 @click.command('init-db')
 def init_db_command():
     '''Command to clear existing data and create tables.'''
+    click.echo('Building database from schema...')
     init_db()
+    click.echo('Parsing CSV data and populating tables...')
+    populate_app_data()
     click.echo('Initialized database.')
 
 
@@ -50,8 +52,9 @@ def init_db_command():
 # Restaurant Hours Data
 # ================================================================================
 
-def populate_app_data(db):
+def populate_app_data():
     '''Populate db tables from CSV.'''
+    db = get_db()
     # Parse data from CSV
     restaurant_hours_data = parse_restaurant_hours()
     populate_restaurant_table(db, restaurant_hours_data)
