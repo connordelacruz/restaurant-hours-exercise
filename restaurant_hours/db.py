@@ -36,7 +36,6 @@ def init_db():
     db = get_db()
     with current_app.open_resource('data/schema.sql') as f:
         db.executescript(f.read().decode('utf8'))
-    # TODO: populate init data
     populate_app_data(db)
 
 
@@ -51,7 +50,7 @@ def init_db_command():
 # ================================================================================
 
 def populate_app_data(db):
-    '''TODO: doc'''
+    '''Populate db tables from CSV.'''
     # Parse data from CSV
     restaurant_hours_data = parse_restaurant_hours()
     populate_restaurant_table(db, restaurant_hours_data)
@@ -78,8 +77,13 @@ def populate_hours_table(db, restaurant_hours_data):
     rows = cursor.fetchall()
     # Iterate through restaurants
     for row in rows:
-        # TODO: for testing. Finish
-        print(f'{row['id']}: {row['name']}')
+        hours_block_tuples = restaurant_hours_data[row['name']]
+        for hours_block_tuple in hours_block_tuples:
+            cursor.execute(
+                'INSERT INTO hours (restaurant_id, days, opens, closes) VALUES (?, ?, ?, ?)',
+                (row['id'],) + hours_block_tuple
+            )
+    db.commit()
 
 
 # ================================================================================
