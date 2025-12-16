@@ -45,6 +45,7 @@ def init_db_command():
     init_db()
     click.echo('Initialized database.')
 
+
 # ================================================================================
 # Restaurant Hours Data
 # ================================================================================
@@ -85,6 +86,26 @@ def populate_hours_table(db, restaurant_hours_data):
             )
     db.commit()
 
+
+def find_open_restaurants(weekday, time_int):
+    '''Returns a list of restaurant names that are open at the specified weekday and time.
+
+    :param weekday: Weekday name (formatted to match constants.WEEKDAYS)
+    :param time_int: Int representation of the target time in 24 hour format (e.g. 2359 = 11:59pm).
+
+    :return: A list of restaurant names that are open at the specified weekday and time.
+    '''
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute(
+        'SELECT restaurant.name FROM restaurant JOIN hours ON restaurant.id = hours.restaurant_id '
+        'WHERE hours.days LIKE ? AND hours.opens <= ? AND hours.closes >= ?',
+        (f'%{weekday}%', time_int, time_int)
+    )
+    rows = cursor.fetchall()
+    return [
+        row['name'] for row in rows
+    ]
 
 # ================================================================================
 # sqlite3 Misc
