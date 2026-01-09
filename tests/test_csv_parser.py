@@ -134,13 +134,28 @@ class TestCsvParser(unittest.TestCase):
         '''Verify that test_parse_days_string() splits out days and day ranges into a list of days as expected.'''
         cases = [
             {
-                'input': 'Mon,Wed,Fri',
+                'input': 'Mon-Sun',
+                'expected': ['Mon', 'Tues', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+            },
+            {
+                'input': 'Mon, Wed, Fri',
                 'expected': ['Mon', 'Wed', 'Fri'],
-            }
+            },
+            {
+                'input': 'Mon-Wed, Fri, Sun',
+                'expected': ['Mon', 'Tues', 'Wed', 'Fri', 'Sun'],
+            },
         ]
+        for case in cases:
+            result = csv_parser.parse_days_string(case['input'])
+            self.assertEqual(result, case['expected'],
+                             self.format_assertion_failure_msg_from_case(case, result))
 
     def test_parse_hours_block_string(self):
+        '''Verify that parse_hours_block_string() parses out days and hours as expected.'''
         pass
+
+    # TODO: post-midnight
 
     def test_parse_restaurant_hours_string(self):
         pass
