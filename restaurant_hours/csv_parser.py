@@ -177,6 +177,7 @@ def sanitize_hours_string(hours_string):
     return convert_time_to_int(hours, minutes, period)
 
 
+# TODO: extract for reuse for API parsing
 def convert_time_to_int(hours, minutes, period):
     '''Convert 12-hour time string representation to an integer representation
     of the 24 hour time.
@@ -230,6 +231,7 @@ def create_after_midnight_hours_block(original_closes, original_days):
 def parse_restaurant_hours():
     '''Function to call when file is executed directly.'''
     package_root_dir = os.path.dirname(__file__)
+    # TODO: take filepath as parameter
     data_dir = os.path.join(package_root_dir, 'data')
     csv_path = os.path.join(data_dir, 'restaurants.csv')
     return parse_csv(csv_path)
